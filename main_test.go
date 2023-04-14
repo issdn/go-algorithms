@@ -1,25 +1,63 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"testing"
 )
 
-func compareArrays(a *[7]int, b *[7]int) bool {
-	for i,j := range a{
+func compareEqualLenArrays(a, b []uint16) (bool, error) {
+	if len(a) != len(b) {
+		return false, errors.New("Arrays are not of equal length")
+	}
+	for i, j := range a {
 		if j != b[i] {
-			return false
+			return false, nil
 		}
 	}
-	return true
+	return true, nil
+}
+
+type SortTestError struct {
+	TestCase []uint16
+	Got      []uint16
+	Want     []uint16
+}
+
+func (e *SortTestError) FormatTestErrorMessage() string {
+	return fmt.Sprintf("\nTest Case:%v\nGot: %v\nWant: %v", e.TestCase, e.Got, e.Want)
 }
 
 func TestBubbleSort(t *testing.T) {
-	toTest := [7]int{4,5,1,7,3,9,5}
-	got := bubbleSort(&toTest)
-	want := [7]int{1,3,4,5,5,7,9}
-	
+	arrToTest := [...]uint16{4, 5, 1, 7, 3, 9, 5}
+	arrToSort := make([]uint16, len(arrToTest))
+	copy(arrToSort, arrToTest[:])
+	got := bubbleSort(arrToTest[:])
+	want := [...]uint16{1, 3, 4, 5, 5, 7, 9}
 
-	if !compareArrays(&got, &want) {
-		t.Errorf("got %v want %v", got, want)
+	isEqual, error := compareEqualLenArrays(got, want[:])
+	if error != nil {
+		t.Errorf("Error: %v", error)
+	}
+
+	if !isEqual {
+		t.Error((&SortTestError{arrToTest[:], got, want[:]}).FormatTestErrorMessage())
+	}
+}
+
+func TestQuicksort(t *testing.T) {
+	want := [...]uint16{1, 3, 4, 5, 5, 7, 9}
+	arrToTest := [...]uint16{4, 5, 1, 7, 3, 9, 5}
+	arrToSort := make([]uint16, len(arrToTest))
+	copy(arrToSort, arrToTest[:])
+	got := quicksort(arrToSort, 0, uint16(len(arrToTest)-1))
+
+	isEqual, error := compareEqualLenArrays(got, want[:])
+	if error != nil {
+		t.Errorf("Error: %v", error)
+	}
+
+	if !isEqual {
+		t.Error((&SortTestError{arrToTest[:], got, want[:]}).FormatTestErrorMessage())
 	}
 }
