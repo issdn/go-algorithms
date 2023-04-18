@@ -12,7 +12,7 @@ func compareEqualLenArrays(a, b []uint16) (bool, error) {
 	}
 	for i, j := range a {
 		if j != b[i] {
-			return false, nil
+			return false, errors.New("Arrays are not of equal")
 		}
 	}
 	return true, nil
